@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>요약 추출 점검 · 관리자</title>
+<style>
+  :root{--bg:#F5F5F7;--card:#fff;--ink:#1D1D1F;--mut:#86868B;--line:#E5E5E5;
+    --ok:#34C759;--weak:#FF9500;--fail:#FF3B30;--none:#C7C7CC;
+    --font:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--serif:'Noto Serif KR','바탕',Georgia,serif;}
+  @media (prefers-color-scheme:dark){:root{--bg:#15161B;--card:#1D2026;--ink:#F2F3F5;--mut:#B0B3BB;--line:rgba(255,255,255,0.12);}}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em;}
+  .wrap{max-width:900px;margin:0 auto;padding:28px 22px 70px;}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px;}
+  h1{font-family:var(--serif);font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;}
+  .sub{font-size:13px;color:var(--mut);margin-top:6px;}
+  .btn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 15px;cursor:pointer;}
+  .btn:hover{opacity:.88;}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:16px 0;}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-left:auto;flex-wrap:wrap;}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:middle;margin-right:4px;}
+  .tally{font-size:14px;color:var(--ink);font-weight:600;}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top;}
+  th{font-size:12px;color:var(--mut);font-weight:600;background:rgba(0,0,0,0.02);}
+  tr:last-child td{border-bottom:none;}
+  .st{font-weight:700;white-space:nowrap;}
+  .st.ok{color:var(--ok);} .st.weak{color:var(--weak);} .st.fail{color:var(--fail);} .st.none{color:var(--none);}
+  .site{font-weight:600;}
+  .cat{font-size:11px;color:var(--mut);}
+  .snip{color:var(--mut);line-height:1.5;}
+  .loading{text-align:center;color:var(--mut);padding:60px 0;}
+  .back{color:var(--mut);text-decoration:none;font-size:13px;}
+  .back:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>요약 추출 점검</h1>
+      <div class="sub">각 출처의 최신 기사 1건으로 본문 요약 추출을 시도합니다. 정부 사이트별로 가능 여부가 달라요.</div>
+    </div>
+    <a class="back" href="/admin">← 관리자</a>
+  </div>
+  <div class="toolbar">
+    <button class="btn" onclick="run()">다시 점검</button>
+    <span class="tally" id="tally"></span>
+    <span class="legend">
+      <span><span class="dot" style="background:var(--ok)"></span>추출 성공</span>
+      <span><span class="dot" style="background:var(--weak)"></span>약함(짧음)</span>
+      <span><span class="dot" style="background:var(--fail)"></span>실패</span>
+      <span><span class="dot" style="background:var(--none)"></span>기사 없음</span>
+    </span>
+  </div>
+  <div id="result"><div class="loading">점검 중입니다… (출처가 많아 10~30초 걸릴 수 있어요)</div></div>
+</div>
+<script>
+const LABEL={ok:"○ 성공",weak:"△ 약함",fail:"✗ 실패",none:"– 없음"};
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+async function run(){
+  const box=document.getElementById("result");
+  box.innerHTML=`<div class="loading">점검 중입니다… (출처가 많아 10~30초 걸릴 수 있어요)</div>`;
+  document.getElementById("tally").textContent="";
+  try{
+    const r=await fetch("/api/summary-check");
+    const data=await r.json();
+    const order={ok:0,weak:1,fail:2,none:3};
+    data.sort((a,b)=>(order[a.status]-order[b.status]));
+    const t={ok:0,weak:0,fail:0,none:0}; data.forEach(d=>t[d.status]++);
+    document.getElementById("tally").textContent=`성공 ${t.ok} · 약함 ${t.weak} · 실패 ${t.fail} · 없음 ${t.none}`;
+    let h=`<table><thead><tr><th>상태</th><th>출처</th><th>글자</th><th>추출 미리보기</th></tr></thead><tbody>`;
+    data.forEach(d=>{
+      h+=`<tr>
+        <td class="st ${d.status}">${LABEL[d.status]}</td>
+        <td><div class="site">${esc(d.site)}</div><div class="cat">${esc(d.category)}</div></td>
+        <td>${d.chars}</td>
+        <td class="snip">${esc(d.snippet)||"<span style='color:var(--none)'>—</span>"}</td>
+      </tr>`;
+    });
+    h+=`</tbody></table>`;
+    box.innerHTML=h;
+  }catch(e){ box.innerHTML=`<div class="loading">점검을 실행하지 못했습니다.</div>`; }
+}
+run();
+</script>
+</body>
+</html>

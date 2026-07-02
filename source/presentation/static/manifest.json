@@ -1,0 +1,17 @@
+{
+    "name": "모니터링 대시보드",
+    "short_name": "모니터링",
+    "description": "정부기관 웹사이트 모니터링 대시보드",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#F7F8F6",
+    "theme_color": "#F7F8F6",
+    "icons": [
+        {
+            "src": "/static/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

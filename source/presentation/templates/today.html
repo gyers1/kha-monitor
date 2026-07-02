@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국주택협회 · 오늘의 소식</title>
+<style>
+  :root{
+    --bg-primary:#FFFFFF; --bg-secondary:#F5F5F7; --bg-card:#FFFFFF;
+    --text-primary:#1D1D1F; --text-secondary:#86868B; --border:#E5E5E5; --shadow:rgba(0,0,0,0.06);
+    --color-accent:#1D1D1F;
+    --color-legislation:#5E5CE6; --color-press:#00A3B4; --color-gazette:#3A6DAD; --color-bill:#FF9500; --color-regulation:#34C759;
+    --tag-bg:#F2F2F7; --hover-bg:#F5F5F7; --dot-alert:#FF3B30;
+    --font-body:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --font-display:'Noto Serif KR','Noto Serif','바탕',Georgia,serif;
+    --bg-glow:rgba(0,163,180,0.08); --bg-glow-neutral:rgba(16,16,18,0.05);
+    --glass:rgba(255,255,255,0.72); --glass-strong:rgba(255,255,255,0.88);
+    --shadow-soft:0 18px 40px rgba(18,18,20,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg-primary:#111216; --bg-secondary:#15161B; --bg-card:#17181E;
+      --text-primary:#F2F3F5; --text-secondary:#B0B3BB; --border:rgba(255,255,255,0.12); --shadow:rgba(0,0,0,0.5);
+      --color-accent:#5AD0C2; --tag-bg:rgba(255,255,255,0.08); --hover-bg:rgba(255,255,255,0.05);
+      --bg-glow:rgba(90,208,194,0.06); --bg-glow-neutral:rgba(255,255,255,0.05);
+      --glass:rgba(22,24,28,0.72); --glass-strong:rgba(24,26,32,0.86); --shadow-soft:0 18px 42px rgba(0,0,0,0.45);
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:var(--font-body); color:var(--text-primary);
+    background:
+      radial-gradient(900px 520px at 8% -8%, var(--bg-glow) 0%, rgba(0,0,0,0) 60%),
+      radial-gradient(900px 520px at 95% 0%, var(--bg-glow-neutral) 0%, rgba(0,0,0,0) 62%),
+      var(--bg-primary);
+    min-height:100vh; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    letter-spacing:-0.01em; font-size:16px; line-height:1.6;
+  }
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      linear-gradient(120deg, rgba(255,255,255,0.22), rgba(255,255,255,0)),
+      radial-gradient(1px 1px at 12% 20%, rgba(0,0,0,0.04), transparent 40%),
+      radial-gradient(1px 1px at 80% 32%, rgba(0,0,0,0.05), transparent 45%),
+      radial-gradient(1px 1px at 30% 78%, rgba(0,0,0,0.03), transparent 40%);
+    opacity:0.4;}
+  .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:34px 24px 70px;}
+  /* header */
+  .page-head{margin-bottom:26px;}
+  .brand{font-size:12px;letter-spacing:.16em;color:var(--text-secondary);font-weight:600;text-transform:uppercase;margin-bottom:8px;}
+  .page-title{font-family:var(--font-display);font-size:2.1rem;font-weight:700;letter-spacing:-0.03em;line-height:1.1;}
+  .page-sum{margin-top:10px;font-size:0.96rem;color:var(--text-secondary);letter-spacing:-0.01em;}
+  .page-sum b{color:var(--text-primary);font-weight:600;}
+  .page-meta{margin-top:4px;font-size:0.82rem;color:var(--text-secondary);}
+  .section-label{font-family:var(--font-display);font-size:1.15rem;font-weight:700;letter-spacing:-0.02em;
+    margin:30px 2px 14px;display:flex;align-items:baseline;gap:10px;}
+  .section-label .sub{font-family:var(--font-body);font-size:0.8rem;font-weight:400;color:var(--text-secondary);letter-spacing:0;}
+  /* category card */
+  .stack{display:flex;flex-direction:column;gap:16px;}
+  .category-section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;
+    box-shadow:0 6px 14px var(--shadow);position:relative;overflow:hidden;border-top:2px solid var(--section-accent,var(--border));
+    transition:transform .18s ease, box-shadow .2s ease;}
+  .category-section[data-category="입법예고"]{--section-accent:var(--color-legislation);}
+  .category-section[data-category="보도자료"]{--section-accent:var(--color-press);}
+  .category-section[data-category="전자관보"]{--section-accent:var(--color-gazette);}
+  .category-section[data-category="의안정보"]{--section-accent:var(--color-bill);}
+  .category-section[data-category="행정규칙"]{--section-accent:var(--color-regulation);}
+  .category-section[data-category="국회일정"]{--section-accent:var(--color-press);}
+  .category-section[data-category="기타"]{--section-accent:var(--color-accent);}
+  .category-header{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .category-title{font-size:1.18rem;font-weight:700;font-family:var(--font-display);letter-spacing:-0.02em;}
+  .category-total{font-size:1.5rem;font-weight:700;font-family:var(--font-display);font-variant-numeric:tabular-nums;color:var(--section-accent,var(--text-primary));}
+  .category-list{margin-top:6px;}
+  /* row */
+  .list-card{display:flex;flex-direction:column;gap:7px;padding:13px 2px;border-bottom:1px solid rgba(0,0,0,0.06);}
+  .list-card:last-child{border-bottom:none;}
+  [data-theme] .list-card{border-color:var(--border);}
+  .meta-line{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:11px;color:var(--text-secondary);}
+  .agency-pill{font-size:11px;font-weight:600;color:var(--text-primary);background:var(--tag-bg);padding:4px 8px;border-radius:4px;text-decoration:none;}
+  a.agency-pill:hover{background:var(--hover-bg);outline:1px solid var(--border);}
+  .multi{font:inherit;font-size:11px;font-weight:700;color:var(--section-accent,var(--color-press));border:1px solid var(--border);
+    background:transparent;padding:3px 8px;border-radius:4px;letter-spacing:0;cursor:pointer;}
+  .multi:hover{background:var(--hover-bg);}
+  .multi.open{background:var(--section-accent,var(--color-press));color:#fff;border-color:transparent;}
+  .sources{margin-top:9px;border-left:2px solid var(--section-accent,var(--border));padding-left:12px;}
+  .src-line{display:flex;gap:9px;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--border);text-decoration:none;}
+  .src-line:last-child{border-bottom:none;}
+  .src-name{font-size:11px;font-weight:600;color:var(--text-secondary);flex-shrink:0;min-width:92px;}
+  .src-title{font-size:13px;color:var(--text-primary);line-height:1.45;}
+  .src-line:hover .src-title{text-decoration:underline;text-underline-offset:2px;}
+  .kw{font-size:11px;color:var(--text-secondary);background:var(--tag-bg);padding:4px 7px;border-radius:4px;}
+  .time-text{margin-left:auto;color:#C7C7CC;}
+  .item-title{font-size:15px;font-weight:500;line-height:1.5;color:var(--text-primary);text-decoration:none;display:block;letter-spacing:-0.01em;}
+  a.item-title:hover{color:var(--section-accent,var(--color-press));}
+  .also{font-size:11px;color:var(--text-secondary);margin-top:1px;}
+  .also a{color:var(--text-secondary);text-decoration:underline;text-underline-offset:2px;margin-left:4px;}
+  .also a:hover{color:var(--text-primary);}
+  /* collapsible rest */
+  .more-head{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+  .more-arrow{font-size:13px;color:var(--text-secondary);transition:transform .3s cubic-bezier(0.2,1.15,0.35,1);}
+  .category-section.open .more-arrow{transform:rotate(180deg);}
+  .rest-body{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s cubic-bezier(0.2,1,0.3,1),opacity .24s ease;}
+  .category-section.open .rest-body{max-height:4000px;opacity:1;margin-top:8px;}
+  .subagency{display:flex;justify-content:space-between;align-items:baseline;font-size:14.5px;font-weight:700;
+    color:var(--text-primary);letter-spacing:-.01em;margin:18px 0 2px;padding:7px 0 7px 11px;
+    border-left:3px solid var(--section-accent,var(--color-press));}
+  .subagency span{color:var(--text-secondary);font-weight:600;font-size:12px;letter-spacing:0;}
+  .rest-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;padding:9px 0 9px 14px;border-bottom:1px solid rgba(0,0,0,0.05);}
+  [data-theme] .rest-row{border-color:var(--border);}
+  .rest-title{flex:1;min-width:62%;font-size:14.5px;font-weight:500;line-height:1.5;color:var(--text-primary);text-decoration:none;letter-spacing:-.01em;}
+  .rest-title:hover{color:var(--section-accent,var(--color-press));}
+  .rest-time{font-size:11px;color:#C7C7CC;margin-left:auto;flex-shrink:0;}
+  .rest-row .sources{flex-basis:100%;}
+  .multi.mini{padding:1px 6px;font-size:10px;}
+  .sumbtn{font:inherit;font-size:11px;font-weight:600;color:var(--text-secondary);background:none;border:1px solid var(--border);
+    border-radius:4px;padding:2px 8px;cursor:pointer;}
+  .sumbtn:hover{background:var(--hover-bg);color:var(--text-primary);}
+  .sumbtn.open{background:var(--section-accent,var(--color-press));color:#fff;border-color:transparent;}
+  .summary-box{margin-top:8px;font-size:13px;line-height:1.65;color:var(--text-secondary);background:var(--bg-secondary);
+    border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  /* states */
+  .foot{margin-top:38px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-secondary);
+    display:flex;justify-content:space-between;letter-spacing:0;}
+  .empty{text-align:center;color:var(--text-secondary);padding:70px 16px;font-size:15px;line-height:1.7;}
+  .loading{text-align:center;color:var(--text-secondary);padding:80px 0;font-size:14px;}
+  .none{font-size:13.5px;color:var(--text-secondary);padding:6px 2px;}
+  .toolbar{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+  .tbtn{font:inherit;font-size:13px;font-weight:600;color:var(--text-primary);background:var(--glass-strong);
+    border:1px solid var(--border);border-radius:10px;padding:9px 15px;cursor:pointer;box-shadow:0 2px 6px var(--shadow);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:inline-flex;align-items:center;gap:7px;}
+  .tbtn:hover{background:var(--hover-bg);}
+  .tbtn .ic{color:var(--color-press);font-weight:700;}
+  .newbadge{font-size:10px;font-weight:700;color:#fff;background:var(--dot-alert);padding:1px 6px;border-radius:999px;letter-spacing:.02em;}
+  .sum-new{color:var(--dot-alert);font-weight:600;}
+  .modal-bg{position:fixed;inset:0;background:rgba(20,20,24,0.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:24px;}
+  .modal-bg.show{display:flex;}
+  .modal{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-soft);
+    width:100%;max-width:640px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .modal-head h3{font-family:var(--font-display);font-size:1.15rem;font-weight:700;}
+  .modal-x{font:inherit;font-size:22px;line-height:1;color:var(--text-secondary);background:none;border:none;cursor:pointer;}
+  .modal-body{padding:16px 22px;overflow:auto;}
+  .brief-hint{font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
+  .brief-text{width:100%;min-height:360px;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    font-size:13.5px;line-height:1.75;color:var(--text-primary);background:var(--bg-secondary);
+    border:1px solid var(--border);border-radius:10px;padding:16px;resize:vertical;white-space:pre-wrap;}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--border);}
+  .mbtn{font:inherit;font-size:13px;font-weight:600;border-radius:10px;padding:9px 16px;cursor:pointer;border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);}
+  .mbtn.primary{background:var(--color-accent);color:var(--bg-card);border-color:transparent;}
+  .mbtn:hover{opacity:.88;}
+  @media print{ body>.wrap{visibility:hidden;} #briefModal,#briefModal *{visibility:visible;}
+    #briefModal{position:absolute;inset:0;background:#fff;display:block;padding:0;}
+    .modal{box-shadow:none;border:none;max-width:none;max-height:none;}
+    .modal-head .modal-x,.modal-foot,.brief-hint{display:none;} .brief-text{border:none;background:#fff;min-height:auto;} }
+  /* 협회 관련 현안(핵심) — 주제(키워드) 우선 + 분야 그리드 */
+  .category-section[data-category="현안"]{--section-accent:#00A3B4;}
+  .category-section.hero{border-top-width:3px;box-shadow:0 10px 26px var(--shadow);}
+  .category-section.hero .category-title{font-size:1.45rem;}
+  .topic-line{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:7px;}
+  .topic{display:inline-block;font-size:12px;font-weight:700;color:var(--section-accent,var(--color-press));
+    border:1px solid currentColor;padding:2px 10px;border-radius:999px;letter-spacing:-.01em;}
+  .topic.muted{color:var(--text-secondary);border-color:var(--line);font-weight:600;}
+  .hero .item-title{font-size:16px;}
+  .category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page-head">
+    <div class="brand">한국주택협회 · 소식 모니터</div>
+    <div class="page-title">오늘의 협회 소식</div>
+    <div class="page-sum" id="sum">—</div>
+    <div class="page-meta" id="meta"></div>
+    <div class="toolbar">
+      <button class="tbtn" onclick="openBriefing()"><span class="ic">▤</span>동향보고 초안</button>
+    </div>
+  </header>
+  <div id="content"><div class="loading">자료를 불러오는 중입니다…</div></div>
+  <div class="foot" id="foot"><span></span><span></span></div>
+
+  <div class="modal-bg" id="briefModal">
+    <div class="modal">
+      <div class="modal-head"><h3>일일 동향보고 초안</h3><button class="modal-x" onclick="closeBriefing()" aria-label="닫기">×</button></div>
+      <div class="modal-body">
+        <div class="brief-hint">오늘의 핵심을 협회 양식으로 정리했습니다. 복사해 보고서·메일에 붙이거나 인쇄/PDF로 저장하세요. (검토 후 사용)</div>
+        <textarea class="brief-text" id="briefText" readonly spellcheck="false"></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="mbtn" onclick="window.print()">인쇄 / PDF 저장</button>
+        <button class="mbtn primary" onclick="copyBriefing(this)">복사</button>
+        <button class="mbtn" onclick="closeBriefing()">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT_ORDER=["입법예고","행정규칙","의안정보","보도자료","전자관보","국회일정","기타"];
+const CAT_PRI={"입법예고":6,"행정규칙":5,"의안정보":4,"보도자료":3,"전자관보":2,"국회일정":1,"기타":0};
+
+function todayKey(){const d=new Date();const p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function fmtDateKo(){const d=new Date();const D=["일","월","화","수","목","금","토"];return `${d.getMonth()+1}월 ${d.getDate()}일 (${D[d.getDay()]})`;}
+function fmtTime(iso){if(!iso)return "";const d=new Date(iso);if(isNaN(d))return "";const p=n=>String(n).padStart(2,"0");return `${p(d.getHours())}:${p(d.getMinutes())}`;}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+
+let CORE=[];
+const SEEN_KEY="housing_today_lastseen";
+function getLastSeen(){try{return localStorage.getItem(SEEN_KEY);}catch(e){return null;}}
+function setLastSeen(v){try{localStorage.setItem(SEEN_KEY,v);}catch(e){}}
+const SECT={"입법예고":"◆ 법령정보  《입법·행정예고》","행정규칙":"◆ 법령정보  《행정규칙·고시》","의안정보":"◆ 의안정보  《발의 법안》","보도자료":"◆ 정책ㆍ보도","전자관보":"◆ 관보 게재","국회일정":"◆ 국회일정","기타":"◆ 기타"};
+function buildBriefing(core,sums,loading){
+  sums=sums||{};
+  const d=new Date(); const D=["일","월","화","수","목","금","토"];
+  let out=`한국주택협회 일일 동향보고\n${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${D[d.getDay()]})\n— 협회 공통 기준 ‘오늘의 핵심’ ${core.length}건\n\n`;
+  if(loading) out+="(주요내용 요약을 불러오는 중입니다…)\n\n";
+  if(!core.length){ out+="오늘은 핵심으로 분류된 자료가 없습니다.\n"; return out; }
+  byCat(core).forEach(([cat,arr])=>{
+    out+=(SECT[cat]||("◆ "+cat))+"\n";
+    arr.slice().sort((a,b)=>b.score-a.score).forEach(a=>{
+      const src=a.count>1?a.members.map(m=>agency(m.name)).join("·"):agency(a.site_name);
+      out+=` ◦ 「${a.title}」 (${src})\n`;
+      if(sums[a.url]) out+=`    └ ${sums[a.url]}\n`;
+    });
+    out+="\n";
+  });
+  out+="※ 주요내용은 상세페이지에서 자동 추출했습니다. 검토 후 사용하세요.\n";
+  return out;
+}
+function openBriefing(){
+  document.getElementById("briefText").value=buildBriefing(CORE);
+  document.getElementById("briefModal").classList.add("show");
+}
+function closeBriefing(){ document.getElementById("briefModal").classList.remove("show"); }
+function copyBriefing(btn){
+  const t=document.getElementById("briefText"); t.focus(); t.select(); t.setSelectionRange(0,999999);
+  let ok=false; try{ok=document.execCommand("copy");}catch(e){}
+  if(!ok&&navigator.clipboard){try{navigator.clipboard.writeText(t.value);ok=true;}catch(e){}}
+  const o=btn.textContent; btn.textContent="복사됨 ✓"; setTimeout(()=>btn.textContent=o,1500);
+}
+
+function normKey(t){
+  let m=t.match(/제\s*[\d\-]+\s*호\s*\((.+)\)/); if(m)t=m[1];
+  t=t.replace(/[\(\[「『][^\)\]」』]*[\)\]」』]/g,"");
+  t=t.replace(/제\s*[\d\-]+\s*호/g,"");
+  t=t.replace(/(재입법예고|입법예고|행정예고|규정변경예고|입안예고|일부개정령안|일부개정령|일부개정안|일부개정규칙안|일부개정고시안|전부개정령안|제정령안|제정안|개정령안|개정안|고시안|공고|고시|훈령|예규)/g,"");
+  t=t.replace(/[\s·\-—~,.()\[\]]+/g,""); return t.trim();
+}
+function cluster(items){
+  const map=new Map();
+  items.forEach((a,i)=>{let k=normKey(a.title); if(k.length<3)k="__"+i; if(!map.has(k))map.set(k,[]); map.get(k).push(a);});
+  const out=[];
+  for(const mem of map.values()){
+    mem.sort((x,y)=>(CAT_PRI[y.category]||0)-(CAT_PRI[x.category]||0)||(x.title.length-y.title.length));
+    const rep=mem[0];
+    const seen=new Set(); const members=[];
+    mem.forEach(m=>{ if(!seen.has(m.site_name)){ seen.add(m.site_name); members.push({name:m.site_name,url:m.url,title:m.title}); } });
+    out.push({title:rep.title,url:rep.url,category:rep.category,site_name:rep.site_name,
+      collected_at:mem.map(m=>m.collected_at).sort().slice(-1)[0],
+      score:Math.max(...mem.map(m=>m.score||0)),is_core:mem.some(m=>m.is_core),
+      matched:[...new Set([].concat(...mem.map(m=>m.matched||[])))].slice(0,3),
+      members,count:members.length});
+  }
+  return out;
+}
+function agency(site){const p=(site||"").trim().split(/\s+/);return (p.length>1&&p[0]!=="대한민국")?p[0]:(site||"기타");}
+function byCat(list){const g={};list.forEach(a=>{const c=a.category||"기타";(g[c]=g[c]||[]).push(a);});
+  return CAT_ORDER.filter(c=>g[c]).concat(Object.keys(g).filter(c=>!CAT_ORDER.includes(c))).map(c=>[c,g[c]]);}
+
+function toggleSources(e,btn){
+  e.preventDefault(); e.stopPropagation();
+  const card=btn.closest(".list-card,.rest-row"); const s=card&&card.querySelector(".sources");
+  if(s){ s.hidden=!s.hidden; btn.classList.toggle("open"); }
+}
+function srcLines(a){
+  return `<div class="sources" hidden>`+a.members.map(s=>
+    `<a class="src-line" href="${esc(s.url)}" target="_blank" rel="noopener"><span class="src-name">${esc(s.name)}</span><span class="src-title">${esc(s.title)}</span></a>`
+  ).join("")+`</div>`;
+}
+function loadSummary(e,btn,encUrl){
+  e.preventDefault(); e.stopPropagation();
+  const card=btn.closest(".list-card"); const box=card&&card.querySelector(".summary-box");
+  if(!box) return;
+  if(!box.hidden){ box.hidden=true; btn.classList.remove("open"); return; }
+  box.hidden=false; btn.classList.add("open");
+  if(box.dataset.loaded) return;
+  box.textContent="주요내용 불러오는 중…";
+  fetch(`/api/summary?url=${encUrl}`).then(r=>r.json()).then(j=>{
+    box.textContent=(j&&j.summary)?j.summary:"주요내용을 가져오지 못했습니다. 제목을 눌러 원문을 확인하세요.";
+    box.dataset.loaded="1";
+  }).catch(()=>{ box.textContent="주요내용을 가져오지 못했습니다."; });
+}
+function row(a){
+  // 주제(키워드)를 맨 앞에 — 매칭 키워드 없으면 분야로 대체
+  const tags=(a.matched||[]).map(k=>`<span class="topic">${esc(k)}</span>`).join("");
+  const head=`<div class="topic-line">${a.isNew?`<span class="newbadge">NEW</span>`:""}${tags||`<span class="topic muted">${esc(a.category)}</span>`}</div>`;
+  let src=a.count>1
+    ? `<button type="button" class="multi" onclick="toggleSources(event,this)">${a.count}곳 게재 ▾</button>`
+    : `<span class="agency-pill">${esc(a.site_name)}</span>`;
+  src+=`<span class="time-text">${fmtTime(a.collected_at)}</span>`;
+  const sources=a.count>1?srcLines(a):"";
+  return `<div class="list-card">${head}
+    <a class="item-title" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>
+    <div class="meta-line">${src}</div>${sources}</div>`;
+}
+function restRow(a){
+  const nb=a.isNew?`<span class="newbadge">NEW</span>`:"";
+  const mc=a.count>1?`<button type="button" class="multi mini" onclick="toggleSources(event,this)">${a.count}곳 ▾</button>`:"";
+  const sources=a.count>1?srcLines(a):"";
+  return `<div class="rest-row">${nb}<a class="rest-title" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a>${mc}<span class="rest-time">${fmtTime(a.collected_at)}</span>${sources}</div>`;
+}
+function restBody(arr){
+  const sub={};arr.forEach(a=>{const ag=agency(a.site_name);(sub[ag]=sub[ag]||[]).push(a);});
+  const ags=Object.keys(sub).sort((x,y)=>sub[y].length-sub[x].length);
+  return `<div class="category-list">`+ags.map(ag=>{
+    sub[ag].sort((a,b)=>(b.collected_at||"").localeCompare(a.collected_at||""));
+    const h=`<div class="subagency">${esc(ag)}<span>${sub[ag].length}건</span></div>`;
+    return h+sub[ag].map(restRow).join("");
+  }).join("")+`</div>`;
+}
+
+async function loadData(isInitial){
+  try{
+    const [aRes,sRes]=await Promise.all([fetch(`/api/articles?date_key=${todayKey()}`),fetch(`/api/sites?active_only=true`).catch(()=>null)]);
+    const items=await aRes.json(); let interval=null;
+    if(sRes&&sRes.ok){try{const sites=await sRes.json();const ivs=sites.map(s=>s.interval_minutes).filter(Boolean);
+      if(ivs.length)interval=ivs.sort((a,b)=>ivs.filter(v=>v===a).length-ivs.filter(v=>v===b).length).pop();}catch(e){}}
+    render(Array.isArray(items)?items:[],interval,isInitial);
+  }catch(e){document.getElementById("content").innerHTML=`<div class="empty">자료를 불러오지 못했습니다.<br>잠시 후 새로고침해 주세요.</div>`;}
+}
+function render(items,interval,isInitial){
+  const box=document.getElementById("content");
+  const cl=cluster(items);
+  const core=cl.filter(a=>a.is_core).sort((a,b)=>(b.score-a.score)||(b.collected_at||"").localeCompare(a.collected_at||""));
+  const rest=cl.filter(a=>!a.is_core);
+  const last=items.map(a=>a.collected_at).filter(Boolean).sort().slice(-1)[0];
+
+  const prevSeen=getLastSeen();
+  cl.forEach(a=>{ a.isNew = !!prevSeen && (a.collected_at||"") > prevSeen; });
+  const newCore=core.filter(a=>a.isNew).length;
+  CORE=core;
+
+  document.getElementById("sum").innerHTML=`${fmtDateKo()} · <b>협회 관련 현안 ${core.length}건</b>`+(newCore>0?` <span class="sum-new">(새 ${newCore}건)</span>`:"")+` · 분야별 ${rest.length}건`;
+  document.getElementById("meta").textContent=`최종 수집 ${last?fmtTime(last):"—"}`+(interval?` · 자동 수집 ${interval}분 간격`:"");
+
+  if(items.length===0){box.innerHTML=`<div class="empty">오늘 수집된 자료가 아직 없습니다.<br>자동 수집이 실행되면 채워집니다.</div>`;
+    document.getElementById("foot").innerHTML="<span></span><span></span>";return;}
+
+  // ① 협회 관련 현안(핵심) — 주제 우선, 한 영역에 모아 크게 강조
+  const coreSorted=core.slice().sort((a,b)=>(b.score-a.score)||(b.collected_at||"").localeCompare(a.collected_at||""));
+  let html=`<section class="category-section hero" data-category="현안">
+    <div class="category-header"><span class="category-title">오늘의 협회 관련 현안</span><span class="category-total">${core.length}</span></div>`;
+  html+= core.length
+    ? `<div class="category-list">${coreSorted.map(row).join("")}</div>`
+    : `<div class="none">오늘은 협회 관련 현안으로 분류된 자료가 없습니다.</div>`;
+  html+=`</section>`;
+
+  // ② 분야별 소식 — 기존 그리드 레이아웃(여러 카드)
+  html+=`<div class="section-label">분야별 소식 <span class="sub">${rest.length}건 · 분야를 눌러 펼치기</span></div>`;
+  html+=`<div class="category-grid">`+byCat(rest).map(([cat,arr])=>{
+    return `<section class="category-section" data-category="${esc(cat)}" onclick="this.classList.toggle('open')">
+      <div class="more-head"><span class="category-title">${esc(cat)}</span>
+        <span style="display:flex;align-items:center;gap:12px;"><span class="category-total">${arr.length}</span><span class="more-arrow">▾</span></span></div>
+      <div class="rest-body" onclick="event.stopPropagation()">${restBody(arr)}</div></section>`;
+  }).join("")+`</div>`;
+
+  box.innerHTML=html;
+  document.getElementById("foot").innerHTML=`<span>한국주택협회 소식 모니터</span><span>최종 수집 ${last?fmtTime(last):"—"}${interval?` · 자동 수집 ${interval}분 간격`:""} · 화면 갱신 ${fmtTime(new Date().toISOString())}</span>`;
+  // 앱을 새로 열 때(최초 로드)만 '마지막 확인' 갱신 → 세션 중 새로 들어온 소식은 NEW 유지
+  if(isInitial && last) setLastSeen(last);
+}
+
+document.addEventListener("keydown",e=>{if(e.ctrlKey&&e.shiftKey&&(e.key==="A"||e.key==="a")){e.preventDefault();window.location.href="/admin";}});
+loadData(true); setInterval(()=>loadData(false),5*60*1000);
+</script>
+</body>
+</html>
